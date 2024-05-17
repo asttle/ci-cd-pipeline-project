@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: spring-boot-app
-        image: asttle/ultimate-cicd:replaceImageTag
+        image: asttledocker/ci-cd-pipeline:replaceImageTag
         ports:
         - containerPort: 8080

@@ -35,7 +35,7 @@ pipeline {
 // Build and push the docker image to docker hub with help of docker creds
     stage('Build and Push Docker Image') {
       environment {
-        DOCKER_IMAGE = "asttle/ultimate-cicd:${BUILD_NUMBER}"
+        DOCKER_IMAGE = "asttledocker/ci-cd-pipeline:${BUILD_NUMBER}"
         // DOCKERFILE_LOCATION = "java-maven-sonar-argocd-helm-k8s/spring-boot-app/Dockerfile"
         REGISTRY_CREDENTIALS = credentials('docker')
       }
