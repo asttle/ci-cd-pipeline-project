@@ -62,6 +62,42 @@ What is pom.xml it is the package dependancy for java similar to package.json fo
 
 Dockerfile is nothing but get the JAR anbd execute the JAR file.
 
+Static code analysis:
+Tell the url at which sonar server is running 
+execute mvn target sonar:sonar with auth token created in jenkins and url of server 
+
+Update the ec2 instance url for sonar server url
+
+Get docker creds build image and push to registry using creds
+
+Finally update the deployment file with image tag 
+I have used shell script but you can also try argocd image updater to update image in argocd repo 
+
+login to git use the creds stored in jenkins update the replcaeImagetag place with actual image:build number 
+
+Run the pipeline cool!
+
+
+
+
+Continuous Delivery
+
+Add the argocd operator which will create all argocd architecture components repo server, app controller all, 
+
+get the secrets from ardocd-cluster and echo secret | base64 -d to decode and get the initial admin password
+
+Port foirward the service - and run it locally 
+provide admin, updated password, 
+
+create a test app- app name test, project (default) if you give own values you should have auth configured
+provide git repo url and path for the manifests 
+
+provide cluster url on the other side and namepsace which argocd runs and sync autoimcatically and create the project 
+
+Thats it all done! entire pipeline executed
+
+
+
 
 
 
