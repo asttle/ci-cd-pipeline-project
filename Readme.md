@@ -1,108 +1,93 @@
-Spin up a instance in ec2, since lot of tools jenkins, docker, git are installed better to proceed with large instance to run smoothly
+# EC2 Instance Setup
 
-1. install git 
-2. configure git 
-    - Create ssh keygen new algo - ed25519 (crypotgraphic algorithm faster than rsa)
-    - move it to ssh agent as it will take care of auth futher - no need to add ssh key each time for git auth
-    - Add the public key to github - ssh keys 
-    - check ssh -T git@github.com for auth 
-3. Install java 
-4. Install jenkins 
-    - https://www.jenkins.io/doc/tutorials/tutorial-for-installing-jenkins-on-AWS/
-5. Setup jenkins with plugins and user
-6. Create new pipeline project - provide git as source and also repo name and branch
-7. Configure the path for jenkinsfile to take inside repo
-8. Pipeline 
-    - Use docker as a agent for the jenkins pipeline (it minimises the configuration and also consider if jenkins spins up a new machine to execute this task, once the task completes this instance will be up and running so its better to run as docker agent as container will be destroyed once its process is over so it can free up space)
+Spin up a instance in EC2. Since a lot of tools like Jenkins, Docker, Git are installed, it's better to proceed with a large instance to run smoothly.
 
-So inside the docker agent consider using maximum dependencies as docker images - so one is docker and other since i use maven we can add maven and sonarqube cannot be added as i am installing it as a separate thing inside ec2. build a docker image with maven and docker and use that as agent image for pipeline, Similar to tools installed via docker or ec2 add the respecitiuve plkugins in jenkins to manage effectively.(docker pipeline and sonarqube scanner)
+## Git Installation and Configuration
 
-Next sonarqube server has to be installed. Install it in same vpc where you are hosting the app (cloud), to avoid security related config.
+1. Install Git.
+2. Configure Git:
+    - Create SSH keygen new algorithm - ed25519 (cryptographic algorithm faster than RSA).
+    - Move it to SSH agent as it will take care of auth further - no need to add SSH key each time for Git auth.
+    - Add the public key to GitHub - SSH keys.
+    - Check SSH -T git@github.com for auth.
 
-to install sonarqubve server
+## Java Installation
+
+Install Java.
+
+## Jenkins Installation and Configuration
+
+1. Install Jenkins. Follow the instructions on [this page](https://www.jenkins.io/doc/tutorials/tutorial-for-installing-jenkins-on-AWS/).
+2. Setup Jenkins with plugins and user.
+3. Create a new pipeline project - provide Git as source and also repo name and branch.
+4. Configure the path for Jenkinsfile to take inside repo.
+
+## Pipeline Configuration
+
+Use Docker as an agent for the Jenkins pipeline. This minimizes the configuration and is efficient as the Docker container will be destroyed once its process is over, freeing up space.
+
+## SonarQube Server Installation
+
+SonarQube server has to be installed in the same VPC where you are hosting the app (cloud), to avoid security-related config.
+
+```bash
 apt install unzip
-adduser sonarqube - why running as separate user, if compromised only sonarqube will be controlled, not the root systems.
+adduser sonarqube
 wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-9.4.0.54424.zip
 unzip *
 chmod -R 755 /home/sonarqube/sonarqube-9.4.0.54424
 chown -R sonarqube:sonarqube /home/sonarqube/sonarqube-9.4.0.54424
 cd sonarqube-9.4.0.54424/bin/linux-x86-64/
 ./sonar.sh start
+```
 
-it will run in port 9000, dont forget to add port 9000 allow in ec2 sg 
+Don't forget to add port 9000 allow in EC2 security group.
 
-admin - admin is the username and password, edit and change it. 
-So jenkins and sonar is running as separate apps, how jenkins can execute tests in sonarqube, so we have to create token, so go to account and generate token for jenkins in sonarqube 
-Add it as credentials in jenkins, we can pass it in pipeline
+# Docker Installation
+Install Docker in EC2 machine.
 
-Install docker in ec2 machine
+```bash
 sudo yum install docker
-
-Add group membership for the default ec2-user so you can run all docker commands without using the sudo command
 sudo usermod -a -G docker ec2-user
 id ec2-user
 newgrp docker
-
 sudo systemctl enable docker.service
 sudo systemctl start docker.service
+```
 
-Kubernets and argoCD we can hae it locally as ec2 is already been overloaded
-Install docker desktop
+# Kubernetes and ArgoCD Installation
+Kubernetes and ArgoCD can be had locally as EC2 is already overloaded. Install Docker Desktop.
 
-Install argocd using operators 
-Go to https://operatorhub.io/
-Search for argocd get install steps. Install and check whether argocd is up and running
+# Continuous Delivery with ArgoCD
+Add the ArgoCD operator which will create all ArgoCD architecture components (repo server, app controller, etc.).
+
+```bash
 curl -sL https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.28.0/install.sh | bash -s v0.28.0
+```
+This will install the OLM operator - which is a Kubernetes component to manage the deployments of operators into K8 cluster and manages its lifecycle upgrades, dependencies, health checks.
 
-This will install the olm operator - which is a kuberneteds component to manage the deployments of operators into k8 cluster and manages its lifecycle upgrades, dependencies, healthchecks
+# Jenkinsfile
+Go to Jenkinsfile and read for complete understanding.
 
-Go to jenkinsfile and read for complete understanding 
+## pom.xml
+pom.xml is the package dependency for Java, similar to package.json for React and Node app.
 
-What is pom.xml it is the package dependancy for java similar to package.json for react and node app
+# Dockerfile
+Dockerfile is nothing but get the JAR and execute the JAR file.
 
-Dockerfile is nothing but get the JAR anbd execute the JAR file.
+# Static Code Analysis
+Tell the URL at which Sonar server is running. Execute mvn target sonar:sonar with auth token created in Jenkins and URL of server.
 
-Static code analysis:
-Tell the url at which sonar server is running 
-execute mvn target sonar:sonar with auth token created in jenkins and url of server 
+# Docker Image Creation and Deployment
+Get Docker creds, build image and push to registry using creds. Finally, update the deployment file with image tag.
 
-Update the ec2 instance url for sonar server url
+# Continuous Delivery
+Add the ArgoCD operator which will create all ArgoCD architecture components (repo server, app controller, etc.). Get the secrets from ArgoCD-cluster and echo secret | base64 -d to decode and get the initial admin password.
 
-Get docker creds build image and push to registry using creds
+Port forward the service - and run it locally. Provide admin, updated password, create a test app- app name test, project (default) if you give own values you should have auth configured. Provide Git repo URL and path for the manifests.
 
-Finally update the deployment file with image tag 
-I have used shell script but you can also try argocd image updater to update image in argocd repo 
+Provide cluster URL on the other side and namespace which ArgoCD runs and sync automatically and create the project.
 
-login to git use the creds stored in jenkins update the replcaeImagetag place with actual image:build number 
-
-Run the pipeline cool!
-
-
-
-
-Continuous Delivery
-
-Add the argocd operator which will create all argocd architecture components repo server, app controller all, 
-
-get the secrets from ardocd-cluster and echo secret | base64 -d to decode and get the initial admin password
-
-Port foirward the service - and run it locally 
-provide admin, updated password, 
-
-create a test app- app name test, project (default) if you give own values you should have auth configured
-provide git repo url and path for the manifests 
-
-provide cluster url on the other side and namepsace which argocd runs and sync autoimcatically and create the project 
-
-Thats it all done! entire pipeline executed
-
-
-
-
-
-
-
-
-
+That's it all done! Entire pipeline executed.
 
 
