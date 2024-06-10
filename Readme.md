@@ -1,4 +1,7 @@
-# EC2 Instance Setup
+# Pipeline Project
+![alt text](image.png)
+
+## EC2 Instance Setup
 
 Spin up a instance in EC2. Since a lot of tools like Jenkins, Docker, Git are installed, it's better to proceed with a large instance to run smoothly.
 
@@ -43,7 +46,7 @@ cd sonarqube-9.4.0.54424/bin/linux-x86-64/
 
 Don't forget to add port 9000 allow in EC2 security group.
 
-# Docker Installation
+## Docker Installation
 Install Docker in EC2 machine.
 
 ```bash
@@ -55,10 +58,10 @@ sudo systemctl enable docker.service
 sudo systemctl start docker.service
 ```
 
-# Kubernetes and ArgoCD Installation
+## Kubernetes and ArgoCD Installation
 Kubernetes and ArgoCD can be had locally as EC2 is already overloaded. Install Docker Desktop.
 
-# Continuous Delivery with ArgoCD
+## Continuous Delivery with ArgoCD
 Add the ArgoCD operator which will create all ArgoCD architecture components (repo server, app controller, etc.).
 
 ```bash
@@ -66,22 +69,22 @@ curl -sL https://github.com/operator-framework/operator-lifecycle-manager/releas
 ```
 This will install the OLM operator - which is a Kubernetes component to manage the deployments of operators into K8 cluster and manages its lifecycle upgrades, dependencies, health checks.
 
-# Jenkinsfile
+## Jenkinsfile
 Go to Jenkinsfile and read for complete understanding.
 
 ## pom.xml
 pom.xml is the package dependency for Java, similar to package.json for React and Node app.
 
-# Dockerfile
+## Dockerfile
 Dockerfile is nothing but get the JAR and execute the JAR file.
 
-# Static Code Analysis
+## Static Code Analysis
 Tell the URL at which Sonar server is running. Execute mvn target sonar:sonar with auth token created in Jenkins and URL of server.
 
-# Docker Image Creation and Deployment
+## Docker Image Creation and Deployment
 Get Docker creds, build image and push to registry using creds. Finally, update the deployment file with image tag.
 
-# Continuous Delivery
+## Continuous Delivery
 Add the ArgoCD operator which will create all ArgoCD architecture components (repo server, app controller, etc.). Get the secrets from ArgoCD-cluster and echo secret | base64 -d to decode and get the initial admin password.
 
 Port forward the service - and run it locally. Provide admin, updated password, create a test app- app name test, project (default) if you give own values you should have auth configured. Provide Git repo URL and path for the manifests.
